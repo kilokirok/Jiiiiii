@@ -7,9 +7,9 @@
         <div class="mb-12 xl:mb-0">
           <h4 v-if="isSignedUp">Thank you - we'll be in touch shortly.</h4>
 
-          <video controls width="250">
+          <video controls width="500">
 
-            <source src="app/static/images/uploads/KakaoTalk_20231114_163734901.mp4" type="video/mp4" />
+            <source src="/static/images/uploads/KakaoTalk_20231114_163734901.mp4" type="video/mp4" />
 
           </video>
   
