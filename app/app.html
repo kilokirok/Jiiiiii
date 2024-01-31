@@ -5,24 +5,28 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.7/shaka-player.compiled.js"></script>
     <script>
 
+      async function loadPlayer(var manifestUri) {
+        try {
+          await player.load(manifestUri);
+          // The video should now be playing!  
+        } catch (e) {
+          onError(e);
+        }
+      }
+
       
       const manifestUri =
     'static/images/uploads/stream.mpd';
       const licenseServer = 'https://license-global.pallycon.com/ri/fpsKeyManager.do?siteId=07MX';
 
-player.configure async({
+player.configure({
     drm: {
       servers: { 'com.widevine.alpha': licenseServer }
     }
   });
 
   // Try to load a manifest.
-  try {
-    await player.load(manifestUri);
-    // The video should now be playing!  
-  } catch (e) {
-    onError(e);
-  }
+  loadPlayer();
       
 function initApp() {
   // Install built-in polyfills to patch browser incompatibilities.
