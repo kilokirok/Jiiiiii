@@ -4,159 +4,104 @@
     {{ HEAD }}
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.7/shaka-player.compiled.js"></script>
     <script>
-      const manifestUri = 'static/images/uploads/stream.mpd';
-const licenseServer = 'https://license-global.pallycon.com/ri/fpsKeyManager.do?siteId=07MX';
+const manifestUri = 'static/images/uploads/stream.mpd';
+const licenseServer = 'https://license-global.pallycon.com/ri/licenseManager.do';
 
 function initApp() {
-  // Install built-in polyfills to patch browser incompatibilities.
-  shaka.polyfill.installAll();
+    // Install built-in polyfills to patch browser incompatibilities.
+    shaka.polyfill.installAll();
 
-  // Check to see if the browser supports the basic APIs Shaka needs.
-  if (shaka.Player.isBrowserSupported()) {
-    // Everything looks good!
-    initPlayer();
-  } else {
-    // This browser does not have the minimum set of APIs we need.
-    console.error('Browser not supported!');
-  }
+    // Check to see if the browser supports the basic APIs Shaka needs.
+    if (shaka.Player.isBrowserSupported()) {
+        // Everything looks good!
+        initPlayer();
+    } else {
+        // This browser does not have the minimum set of APIs we need.
+        console.error('Browser not supported!');
+    }
 }
 
 async function initPlayer() {
-  // Create a Player instance.
-  const video = document.getElementById('video');
-  const player = new shaka.Player();
+    // Create a Player instance.
+    const video = document.getElementById('video');
+    const player = new shaka.Player();
 
-  player.configure({
-    drm: {
-      servers: { 'com.widevine.alpha': licenseServer }
+    player.configure({
+        drm: {
+            servers: {
+                'com.widevine.alpha': licenseServer
+            }
+        }
+    });
+
+    // Try to load a manifest.
+    try {
+        player.getNetworkingEngine().registerRequestFilter(function(type, request, context) {
+            // Only add headers to license requests:
+            if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
+              // This is the specific header name and value the server wants:
+              request.headers['CWIP-Auth-Header'] = 'eyJhY2Nlc3Nfa2V5IjoieEhCaWdFbXVJT0w1bUY2dDJpd2I0dlNEQ0tNSjZ4XC9mWGJjRWdZNTM5Y2t0WlZNeEhqU1lhYlNldGp4a2s2TTgiLCJzaXRlX2lkIjoiMDdNWCJ9';
+            }
+          });
+
+        await player.load(manifestUri);
+        // The video should now be playing!  
+    } catch (e) {
+        onError(e);
     }
-  });
 
-  // Try to load a manifest.
-  try {
-    await player.load(manifestUri);
-    // The video should now be playing!  
-  } catch (e) {
-    onError(e);
-  }
+    await player.attach(video);
 
-  await player.attach(video);
+    // Attach player to the window to make it easy to access in the JS console.
+    window.player = player;
 
-  // Attach player to the window to make it easy to access in the JS console.
-  window.player = player;
+    // Listen for error events.
+    player.addEventListener('error', onErrorEvent);
 
-  // Listen for error events.
-  player.addEventListener('error', onErrorEvent);
-
-  // Try to load a manifest.
-  // This is an asynchronous process.
-  try {
-    await player.load(manifestUri);
-    // This runs if the asynchronous load is successful.
-    console.log('The video has now been loaded!');
-  } catch (e) {
-    // onError is executed if the asynchronous load fails.
-    onError(e);
-  }
+    // Try to load a manifest.
+    // This is an asynchronous process.
+    try {
+        await player.load(manifestUri);
+        // This runs if the asynchronous load is successful.
+        console.log('The video has now been loaded!');
+    } catch (e) {
+        // onError is executed if the asynchronous load fails.
+        onError(e);
+    }
 }
 
 function onErrorEvent(event) {
-  // Extract the shaka.util.Error object from the event.
-  onError(event.detail);
+    // Extract the shaka.util.Error object from the event.
+    onError(event.detail);
 }
 
 function onError(error) {
-  // Log the error.
-  console.error('Error code', error.code, 'object', error);
+    // Log the error.
+    console.error('Error code', error.code, 'object', error);
 }
 
 document.addEventListener('DOMContentLoaded', initApp);
 
-      //
+//
 const AES_IV = "0123456789abcdef";
 const siteInfo = {
-  "siteId": "07MX",
-  "siteKey": "rQvVlSLOyYm10n8AQczOVs4akdoqJBcR",
-  "accessKey": "R7djaHu7y6hEGZnXcUNQkh50luuOUGqx"
+    "siteId": "07MX",
+    "siteKey": "rQvVlSLOyYm10n8AQczOVs4akdoqJBcR",
+    "accessKey": "R7djaHu7y6hEGZnXcUNQkh50luuOUGqx"
 };
 
 let licenseInfo = {
-  "drmType": "Widevine",
-  "contentId": "demo",
-  "userId": "LICENSETOKEN"
+    "drmType": "Widevine",
+    "contentId": "demo",
+    "userId": "LICENSETOKEN"
 };
 
 let licensePolicy = {
-  "policy_version": 2,
-  "playback_policy": {
-    "persistent": false
-  }
+    "policy_version": 2,
+    "playback_policy": {
+        "persistent": false
+    }
 };
-
-//console.log("license policy : " + JSON.stringify(licensePolicy));
-
-
-const crypto = require("crypto");
-
-const cipher = crypto.createCipheriv("aes-256-cbc", siteInfo.siteKey, AES_IV);
-let encryptedPolicy = cipher.update(
-  JSON.stringify(licensePolicy),
-  "utf-8",
-  "base64"
-);
-encryptedPolicy += cipher.final("base64");
-
-//console.log("encrypted policy : " + encryptedPolicy);
-
-
-const UTCTime = new Date().toISOString().replace(/\.\d{3}/gi, '');
-
-let hashData = {
-  siteId: siteInfo.siteId,
-  accessKey: siteInfo.accessKey,
-  drmType: licenseInfo.drmType,
-  userId: licenseInfo.userId,
-  cid: licenseInfo.contentId,
-  policy: encryptedPolicy,
-  timestamp: UTCTime
-};
-
-const hashInput =
-  hashData.accessKey +
-  hashData.drmType +
-  hashData.siteId +
-  hashData.userId +
-  hashData.cid +
-  hashData.policy +
-  hashData.timestamp;
-
-//console.log("hash input : " + hashInput);
-
-let hashString = crypto
-  .createHash("sha256")
-  .update(hashInput)
-  .digest("base64");
-
-//console.log("hash string : " + hashString);
-
-let tokenData = {
-  "drm_type": licenseInfo.drmType,
-  "site_id": siteInfo.siteId,
-  "user_id": licenseInfo.userId,
-  "cid": licenseInfo.contentId,
-  "policy": encryptedPolicy,
-  "timestamp": UTCTime,
-  "hash": hashString, 
-  "response_format": "original",
-  "key_rotation": false
-};
-
-console.log("token json : " + JSON.stringify(tokenData));
-
-let base64Token = Buffer.from(JSON.stringify(tokenData)).toString("base64");
-
-console.log("base64 encoded token : " + base64Token);
-
     </script>
   </head>
 
