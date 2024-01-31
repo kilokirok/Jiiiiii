@@ -4,31 +4,9 @@
     {{ HEAD }}
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.7.7/shaka-player.compiled.js"></script>
     <script>
+      const manifestUri = 'static/images/uploads/stream.mpd';
+const licenseServer = 'https://license-global.pallycon.com/ri/fpsKeyManager.do?siteId=07MX';
 
-      async function loadPlayer(manifestUri) {
-        try {
-          await player.load(manifestUri);
-          // The video should now be playing!  
-        } catch (e) {
-          onError(e);
-        }
-      }
-
-      var player;
-      
-      const manifestUri =
-    'static/images/uploads/stream.mpd';
-      const licenseServer = 'https://license-global.pallycon.com/ri/fpsKeyManager.do?siteId=07MX';
-
-player.configure({
-    drm: {
-      servers: { 'com.widevine.alpha': licenseServer }
-    }
-  });
-
-  // Try to load a manifest.
-  loadPlayer();
-      
 function initApp() {
   // Install built-in polyfills to patch browser incompatibilities.
   shaka.polyfill.installAll();
@@ -47,6 +25,21 @@ async function initPlayer() {
   // Create a Player instance.
   const video = document.getElementById('video');
   const player = new shaka.Player();
+
+  player.configure({
+    drm: {
+      servers: { 'com.widevine.alpha': licenseServer }
+    }
+  });
+
+  // Try to load a manifest.
+  try {
+    await player.load(manifestUri);
+    // The video should now be playing!  
+  } catch (e) {
+    onError(e);
+  }
+
   await player.attach(video);
 
   // Attach player to the window to make it easy to access in the JS console.
@@ -163,6 +156,7 @@ console.log("token json : " + JSON.stringify(tokenData));
 let base64Token = Buffer.from(JSON.stringify(tokenData)).toString("base64");
 
 console.log("base64 encoded token : " + base64Token);
+
     </script>
   </head>
 
