@@ -40,7 +40,7 @@ async function initPlayer() {
             // Only add headers to license requests:
             if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
               // This is the specific header name and value the server wants:
-              request.headers['CWIP-Auth-Header'] = 'eyJhY2Nlc3Nfa2V5IjoieEhCaWdFbXVJT0w1bUY2dDJpd2I0dlNEQ0tNSjZ4XC9mWGJjRWdZNTM5Y2t0WlZNeEhqU1lhYlNldGp4a2s2TTgiLCJzaXRlX2lkIjoiMDdNWCJ9';
+              request.headers['pallycon-customdata-v2'] = 'eyJhY2Nlc3Nfa2V5IjoieEhCaWdFbXVJT0w1bUY2dDJpd2I0dlNEQ0tNSjZ4XC9mWGJjRWdZNTM5Y2t0WlZNeEhqU1lhYlNldGp4a2s2TTgiLCJzaXRlX2lkIjoiMDdNWCJ9';
             }
           });
 
