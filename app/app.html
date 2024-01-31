@@ -10,7 +10,7 @@
     'static/images/uploads/stream.mpd';
       const licenseServer = 'https://license-global.pallycon.com/ri/fpsKeyManager.do?siteId=07MX';
 
-player.configure({
+player.configure async({
     drm: {
       servers: { 'com.widevine.alpha': licenseServer }
     }
