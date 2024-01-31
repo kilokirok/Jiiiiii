@@ -56,6 +56,91 @@ function onError(error) {
 }
 
 document.addEventListener('DOMContentLoaded', initApp);
+
+      //
+const AES_IV = "0123456789abcdef";
+const siteInfo = {
+  "siteId": "07MX",
+  "siteKey": "rQvVlSLOyYm10n8AQczOVs4akdoqJBcR",
+  "accessKey": "R7djaHu7y6hEGZnXcUNQkh50luuOUGqx"
+};
+
+let licenseInfo = {
+  "drmType": "Widevine",
+  "contentId": "demo",
+  "userId": "LICENSETOKEN"
+};
+
+let licensePolicy = {
+  "policy_version": 2,
+  "playback_policy": {
+    "persistent": false
+  }
+};
+
+//console.log("license policy : " + JSON.stringify(licensePolicy));
+
+
+const crypto = require("crypto");
+
+const cipher = crypto.createCipheriv("aes-256-cbc", siteInfo.siteKey, AES_IV);
+let encryptedPolicy = cipher.update(
+  JSON.stringify(licensePolicy),
+  "utf-8",
+  "base64"
+);
+encryptedPolicy += cipher.final("base64");
+
+//console.log("encrypted policy : " + encryptedPolicy);
+
+
+const UTCTime = new Date().toISOString().replace(/\.\d{3}/gi, '');
+
+let hashData = {
+  siteId: siteInfo.siteId,
+  accessKey: siteInfo.accessKey,
+  drmType: licenseInfo.drmType,
+  userId: licenseInfo.userId,
+  cid: licenseInfo.contentId,
+  policy: encryptedPolicy,
+  timestamp: UTCTime
+};
+
+const hashInput =
+  hashData.accessKey +
+  hashData.drmType +
+  hashData.siteId +
+  hashData.userId +
+  hashData.cid +
+  hashData.policy +
+  hashData.timestamp;
+
+//console.log("hash input : " + hashInput);
+
+let hashString = crypto
+  .createHash("sha256")
+  .update(hashInput)
+  .digest("base64");
+
+//console.log("hash string : " + hashString);
+
+let tokenData = {
+  "drm_type": licenseInfo.drmType,
+  "site_id": siteInfo.siteId,
+  "user_id": licenseInfo.userId,
+  "cid": licenseInfo.contentId,
+  "policy": encryptedPolicy,
+  "timestamp": UTCTime,
+  "hash": hashString, 
+  "response_format": "original",
+  "key_rotation": false
+};
+
+console.log("token json : " + JSON.stringify(tokenData));
+
+let base64Token = Buffer.from(JSON.stringify(tokenData)).toString("base64");
+
+console.log("base64 encoded token : " + base64Token);
     </script>
   </head>
 
