@@ -6,6 +6,11 @@
     <script>
 const manifestUri = 'static/images/uploads/stream.mpd';
 const licenseServer = 'https://license-global.pallycon.com/ri/licenseManager.do';
+var widevineToken = 'eyJhY2Nlc3Nfa2V5IjoieEhCaWdFbXVJT0w1bUY2dDJpd2I0dlNEQ0tNSjZ4XC9mWGJjRWdZNTM5Y2t0WlZNeEhqU1lhYlNldGp4a2s2TTgiLCJzaXRlX2lkIjoiMDdNWCJ9';
+
+function setWidevineToken(newWidevineToken) {
+    widevineToken = newWidevineToken;
+}
 
 function initApp() {
     // Install built-in polyfills to patch browser incompatibilities.
@@ -36,13 +41,20 @@ async function initPlayer() {
 
     // Try to load a manifest.
     try {
-        player.getNetworkingEngine().registerRequestFilter(function(type, request, context) {
+        player.getNetworkingEngine().registerRequestFilter(function (type, request) {
             // Only add headers to license requests:
             if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
-              // This is the specific header name and value the server wants:
-              request.headers['pallycon-customdata-v2'] = 'eyJhY2Nlc3Nfa2V5IjoieEhCaWdFbXVJT0w1bUY2dDJpd2I0dlNEQ0tNSjZ4XC9mWGJjRWdZNTM5Y2t0WlZNeEhqU1lhYlNldGp4a2s2TTgiLCJzaXRlX2lkIjoiMDdNWCJ9';
+                console.log("request :" + request.body);
+                setCustomData(request);
             }
-          });
+        });
+
+        player.getNetworkingEngine().registerResponseFilter(function (type, response) {
+            // Alias some utilities provided by the library.
+            if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
+                parsingResponse(response);
+            }
+        });
 
         await player.load(manifestUri);
         // The video should now be playing!  
@@ -70,6 +82,45 @@ async function initPlayer() {
     }
 }
 
+function parsingResponse(response) {
+    let responseText = arrayBufferToString(response.data);
+    // Trim whitespace.
+    responseText = responseText.trim();
+
+    console.log('responseText :: ', responseText);
+
+    try {
+        const pallyconObj = JSON.parse(responseText);
+        if (pallyconObj && pallyconObj.errorCode && pallyconObj.message) {
+            if ("8002" != errorCode) {
+                alert("PallyCon Error : " + pallyconObj.message + "(" + pallyconObj.errorCode + ")");
+                //window.alert('No Rights. Server Response ' + responseText);
+            } else {
+                var errorObj = JSON.parse(pallyconObj.message);
+                alert("Error : " + errorObj.MESSAGE + "(" + errorObj.ERROR + ")");
+            }
+        }
+    } catch (e) {}
+}
+
+function setCustomData(request) {
+    if ('Widevine' === drmType) {
+        // const newWidevineToken = '';
+        // setWidevineToken(newWidevineToken);
+        request.headers['pallycon-customdata-v2'] = widevineToken;
+    }
+    else if ('PlayReady' === drmType) {
+        // const newPlayReadyToken = '';
+        // setPlayReadyToken(newPlayReadyToken);
+        request.headers['pallycon-customdata-v2'] = playreadyToken;
+    }
+    else if ('FairPlay' === drmType) {
+        // const newFairPlayToken = '';
+        // setFairPlayToken(newFairPlayToken);
+        request.headers['pallycon-customdata-v2'] = fairplayToken;
+    }
+}
+
 function onErrorEvent(event) {
     // Extract the shaka.util.Error object from the event.
     onError(event.detail);
@@ -81,27 +132,6 @@ function onError(error) {
 }
 
 document.addEventListener('DOMContentLoaded', initApp);
-
-//
-const AES_IV = "0123456789abcdef";
-const siteInfo = {
-    "siteId": "07MX",
-    "siteKey": "rQvVlSLOyYm10n8AQczOVs4akdoqJBcR",
-    "accessKey": "R7djaHu7y6hEGZnXcUNQkh50luuOUGqx"
-};
-
-let licenseInfo = {
-    "drmType": "Widevine",
-    "contentId": "demo",
-    "userId": "LICENSETOKEN"
-};
-
-let licensePolicy = {
-    "policy_version": 2,
-    "playback_policy": {
-        "persistent": false
-    }
-};
     </script>
   </head>
 
