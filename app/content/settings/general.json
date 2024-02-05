@@ -5,8 +5,7 @@
   "logo": "/images/uploads/logo.svg",
   "icon": "/images/uploads/logo.png",
   'com.widevine.alpha': {
-    'persistentStateRequired': true
-  },
+    'persistentStateRequired': true},
   "loadingColor": "#0b3765",
   "seoDescription": "A quickstart for Nuxt & Netlify CMS",
   "seoMetaImage": ""
