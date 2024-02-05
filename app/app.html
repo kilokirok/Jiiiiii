@@ -136,8 +136,12 @@ document.addEventListener('DOMContentLoaded', initApp);
   </head>
 
   <body {{ BODY_ATTRS }}>
-    {{ APP }}
-
+   
+    <video  id="video"
+      width="640"
+      poster="//shaka-player-demo.appspot.com/assets/poster.jpg"
+      controls autoplay>
+    </video>
     <noscript>
       <noframes>
         You maybe have disabled JavaScript and Frames, please enable JavaScript or frames in You
