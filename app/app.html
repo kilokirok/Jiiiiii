@@ -105,8 +105,8 @@ function parsingResponse(response) {
 
 function setCustomData(request) {
     if ('Widevine' === drmType) {
-        // const newWidevineToken = '';
-        // setWidevineToken(newWidevineToken);
+        const newWidevineToken = '';
+         setWidevineToken(newWidevineToken);
         request.headers['pallycon-customdata-v2'] = widevineToken;
     }
     else if ('PlayReady' === drmType) {
