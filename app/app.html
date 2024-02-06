@@ -3,11 +3,13 @@
   <head>
     {{ HEAD }}
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/shaka-player@4.6.2/dist/shaka-player.compiled.min.js"></script>
-    <script>
-      
+
     <script type="application/xml" id="xmlData">
      <ContentProtection schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"/> 
     </script>
+    
+    <script>
+       
     
 const manifestUri = 'https://master--gdrm.netlify.app/images/uploads/stream.mpd';
 const licenseServer = 'https://license-global.pallycon.com/ri/licenseManager.do';
