@@ -63,7 +63,16 @@ async function initPlayer() {
         onError(e);
     }
 
-   
+   player.configure({
+  manifest: {
+    dash: {
+      keySystemsByURI: {
+        'urn:uuid:9a04f079-9840-4286-ab92-e65be0885f95': 'com.microsoft.playready.recommendation',
+        'urn:uuid:79f0049a-4098-8642-ab92-e65be0885f95': 'com.microsoft.playready.recommendation',
+      }
+  }
+  }
+});
 
     // Attach player to the window to make it easy to access in the JS console.
     window.player = player;
