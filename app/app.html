@@ -41,16 +41,10 @@ async function initPlayer() {
   
     player.configure({
       drm: {
-        servers: {
-          'com.widevine.alpha': 'https://foo.bar/drm/widevine',
-          'com.microsoft.playready': 'https://foo.bar/drm/playready'
-        }
+        servers: { 'com.widevine.alpha': licenseServer }
       }
     });
-
-    // Try to load a manifest.
-    try {
-        player.getNetworkingEngine().registerRequestFilter(function (type, request) {
+    player.getNetworkingEngine().registerRequestFilter(function (type, request) {
             // Only add headers to license requests:
             if (type == shaka.net.NetworkingEngine.RequestType.LICENSE) {
                 console.log("request :" + request.body);
@@ -64,6 +58,9 @@ async function initPlayer() {
                 parsingResponse(response);
             }
         });
+    // Try to load a manifest.
+    try {
+       
 
         await player.load(manifestUri);
         // The video should now be playing!  
