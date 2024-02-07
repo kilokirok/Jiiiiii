@@ -40,11 +40,12 @@ async function initPlayer() {
     await player.attach(video);
   
     player.configure({
-        drm: {
-            servers: {
-                'com.widevine.alpha': licenseServer
-            }
+      drm: {
+        servers: {
+          'com.widevine.alpha': 'https://foo.bar/drm/widevine',
+          'com.microsoft.playready': 'https://foo.bar/drm/playready'
         }
+      }
     });
 
     // Try to load a manifest.
